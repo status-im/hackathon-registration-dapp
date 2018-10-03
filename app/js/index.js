@@ -41,6 +41,7 @@ class App extends React.Component {
             //          The values to send are, a merkle proof, code, and the web3.eth.defaultAccount.   
             //          The merkle proof function uses a bytes32 hash, so you need to use hashedCode
             // TODO: if result is false, show error or something because the code is invalid or has been used
+            //            TODO: you may use the sentToAddress(web3.eth.defaultAddress) or codeUsed("0x" + code) to identify as well if the code / address has been used before, and redirect dierctly to ENS
             // TODO: if result is true the code hasn't been processed. Proceed to verify if the background service will process that transaction
             // TODO:    use orbit db, check if exist a value in a orbitdb keyvalue store  `status-hackathon-transactions2`  Address of db can be seen by executing node server/main.js
             //          the key to use is the code
