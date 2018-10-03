@@ -504,3 +504,4 @@ module.exports = {
 	]
 };
 
+module.exports.elements = module.exports.elements.map(x => new Buffer(x.substring(2), 'hex'));

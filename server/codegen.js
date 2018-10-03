@@ -35,6 +35,7 @@ stream2.once('open', function(fd) {
                     .map(el => "\t\t'0x" + el.toString('hex') + "'")
                     .join(",\n"))
     stream2.write("\n\t]\n};\n\n");
+    stream2.write("module.exports.elements = module.exports.elements.map(x => new Buffer(x.substring(2), 'hex'));\n\n");
     stream2.end();
 });
 
