@@ -3,7 +3,7 @@ const MerkleTree = require('merkle-tree-solidity');
 const { sha3 } = require('ethereumjs-util');
 const fs = require('fs');
 
-const numCodes = 500;
+const numCodes = 10;
 const codeLength = 5;
 
 const codes = [];
@@ -13,7 +13,7 @@ for(i = 0; i < numCodes; i++){
     const code = crypto.randomBytes(codeLength).toString('hex');
 
     codes.push(code);
-    elements.push(sha3(code));
+    elements.push(sha3(new Buffer(code, 'hex')));
 }
 
 const merkleTree = new MerkleTree.default(elements);
@@ -35,7 +35,7 @@ stream2.once('open', function(fd) {
                     .map(el => "\t\t'0x" + el.toString('hex') + "'")
                     .join(",\n"))
     stream2.write("\n\t]\n};\n\n");
-    stream2.write("module.exports.elements = module.exports.elements.map(x => new Buffer(x.substring(2), 'hex'));\n\n");
+    stream2.write("module.exports.elements = module.exports.elements.map(x => Buffer.from(x.substring(2), 'hex'));\n\n");
     stream2.end();
 });
 
