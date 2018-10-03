@@ -1,0 +1,24 @@
+{
+  "name": "hackathon-onboarding",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "test": "embark test",
+    "start": "nodemon server/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "",
+  "devDependencies": {
+    "nodemon": "^1.18.4"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "ethereumjs-util": "^5.2.0",
+    "ipfs": "^0.32.3",
+    "ipfs-api": "^24.0.2",
+    "merkle-tree-solidity": "^1.0.8",
+    "orbit-db": "^0.19.9",
+    "web3": "^1.0.0-beta.34"
+  }
+}
