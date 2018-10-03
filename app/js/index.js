@@ -34,7 +34,7 @@ class App extends React.Component {
             //          The merkle proof function uses a bytes32 hash, so you need to use hashedCode
             // TODO: if result is false, show error or something because the code is invalid or has been used
             // TODO: if result is true the code hasn't been processed. Proceed to verify if the background service will process that transaction
-            // TODO:    use orbit db, check if exist a value in a keyvalue store  `status-hackathon-fund-requests` 
+            // TODO:    use orbit db, check if exist a value in a keyvalue store  `status-hackathon-fund-requests`  Address of db can be seen by executing node server/main.js
             //          the key to use is the code
             // TODO:    if a value exists,  the background service will process this code, show a message indicating that transaction is being processed
             // TODO:    if it doesnt, 

@@ -41,8 +41,11 @@ ipfs.on('ready', async () => {
 
 const start = async () => {
     console.log("Connecting to data stores...");
-    const transactionStore = await orbitdb.keyvalue('rramos-transactions-adadasdasd');
-    const fundRequestStore = await orbitdb.log('rramos-funds-requests-adadasdasd');
+    const transactionStore = await orbitdb.keyvalue('status-hackathon-transactions');
+    console.log("status-hackathon-transactions: " + transactionStore.address.toString());
+
+    const fundRequestStore = await orbitdb.log('status-hackathon-fund-requests');
+    console.log("status-hackathon-fund-requests: " + fundRequestStore.address.toString());
 
     let lastCodeProcessed;
 
@@ -88,7 +91,7 @@ const start = async () => {
             });
         
         // Wait for all promises to be resolved
-        Promise.all(results).then((completed) => {
+        Promise.all(all).then((completed) => {
             running = false;
         });
 
