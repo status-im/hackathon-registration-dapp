@@ -25,7 +25,6 @@
   "dependencies": {
     "crypto": "^1.0.1",
     "ethereumjs-util": "^5.2.0",
-    "ipfs": "^0.32.3",
     "ipfs-api": "^24.0.2",
     "merkle-tree-solidity": "^1.0.8",
     "orbit-db": "^0.19.9",
