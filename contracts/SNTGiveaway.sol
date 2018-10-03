@@ -71,5 +71,11 @@ contract SNTGiveaway is Controlled {
         require(SNT.transfer(controller, sntBalance), "Transfer did not work");
         selfdestruct(controller);
     }
+
+
+      function() public payable {
+          
+       }
+
     
 }

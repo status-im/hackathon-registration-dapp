@@ -7,7 +7,10 @@ const { sha3 } = require('ethereumjs-util');
 
 
 import SNTGiveaway from 'Embark/contracts/SNTGiveaway';
+import SNT from 'Embark/contracts/SNT';
+
 window.SNTGiveaway = SNTGiveaway;
+window.SNT = SNT;
 
 class App extends React.Component {
 
