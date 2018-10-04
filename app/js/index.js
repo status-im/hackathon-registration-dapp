@@ -24,14 +24,12 @@ class App extends React.Component {
 
     constructor(props) {
       super(props);
-
       this.state = {
         error: false,
         errorMessage: '',
         ready: false
       };
     }
-    
 
     componentDidMount(){
         EmbarkJS.onReady(async (error) => {
@@ -52,7 +50,7 @@ class App extends React.Component {
             ipfs.on('ready', async () => {
                 try {
                     const orbitdb = new OrbitDB(ipfs);
-                    start(orbitdb);
+                    await this.start(orbitdb);
                 } catch (error) {
                     this.setState({error: true, errorMessage: "Error loading the DAPP - Contact your nearest Status Core Developer"});
                     console.error(error);
@@ -62,8 +60,16 @@ class App extends React.Component {
         });
     }
 
+    async redirectIfProcessed(code){
+        const sentToAddress =  await SNTGiveaway.methods.sentToAddress(web3.eth.defaultAccount).call();
+        const usedCode =  await SNTGiveaway.methods.codeUsed( '0x' + code,).call();
+        if(sentToAddress || usedCode){
+            window.location = "http://status.im"; // TODO: redirect to ENS Registration DAPP URL
+        }
+    }
+
     async start(orbitdb){
-        const code = location.hash.replace("#");        // QR code value, i.e.: a8cd4b33bc
+        const code = location.hash.replace("#", '');        // QR code value, i.e.: a8cd4b33bc
         const accounts = await web3.eth.getAccounts();
 
         web3.eth.defaultAccount = accounts[0];
@@ -72,21 +78,24 @@ class App extends React.Component {
             this.setState({error: true, errorMessage: "Code is required"});
             return;
         }
-        
         const merkleTree = new merkle(merkleData.elements);
-        const hashedCode = sha3(code);                  // Code converted to format used on merkletree
-        const proof = merkleTree.getProof(hashedCode);
+        const hashedCode = sha3('0x' + code);   
 
-        const sentToAddress =  await contract.methods.sentToAddress(web3.eth.defaultAccount).call();
-        const usedCode =  await contract.methods.usedCode( '0x' + code,).call();
-        const validRequest =  await contract.methods.validRequest(proof, '0x' + code, web3.eth.defaultAccount).call();
-
-        if(sentToAddress || usedCode){
-            window.location = "http://status.im"; // TODO: redirect to ENS Registration DAPP URL
+        let proof;
+        try {
+            proof = merkleTree.getProof(hashedCode);
+        } catch(error){
+            this.setState({error: true, errorMessage: "Invalid Code"});
+            console.log(error);
+            return;
         }
 
+        this.redirectIfProcessed(code);
+
+        const validRequest = await SNTGiveaway.methods.validRequest(proof, '0x' + code, web3.eth.defaultAccount).call();
         if(!validRequest){
             this.setState({error: true, errorMessage: "Invalid Code"});
+            console.error("Code not found in contract's merkle root");
             return;
         }
 
@@ -94,29 +103,43 @@ class App extends React.Component {
         const transactionsDb = await orbitdb.keyvalue("/orbitdb/QmVL48QDwdagfGnwcasTxuGTynTxpzJbiZVgLwoiW7Cg7e/status-hackathon-transactions2");
         await transactionsDb.load();
         
-        const transaction = await transactionStore.get(code);
-        if(transaction){
-            // TODO: show a message indicating that transaction is already being processed
-        } else {
-            // TODO: let's add a value to the status-fund-requests2 orbitdb log store, with a json containing the data used to invoke the validRequest contract function (all values must be strings): {code, proof: proof: proof.map(x => '0x' + x.toString('hex')), address}
-            // show a message indicating that transaction is being processed        
-            // /orbitdb/QmQ7dJmRiCwWGNgjDoUKX9xhdVA8vcS92R1h8S4uj1sm6v/status-hackathon-fund-requests2
+        const transaction = await transactionsDb.get(code);
+        if(!transaction){
+            const fundRequestsDB = await orbitdb.log("/orbitdb/QmQ7dJmRiCwWGNgjDoUKX9xhdVA8vcS92R1h8S4uj1sm6v/status-hackathon-fund-requests2");
+            await fundRequestsDB.load();
+
+            const record = {
+                code,
+                address: web3.eth.defaultAccount,
+                proof: proof.map(x => '0x' + x.toString('hex'))
+            }
+
+            const hash = await fundRequestsDB.add(record)
+
+            console.log(hash);
+
+            // TODO: avoid people spamming with localstorage
         }
 
         // Listen for updates
         transactionsDb.events.on('replicated', (address) => {
-            // TODO: trigger check
-           // TODO: We'll deal here with the redirect to ENS Registration. Verify if the transaction is processed and redirect or something
-
+            this.redirectIfProcessed(code);
         });
-    
+
+
         this.setState({ready: true});
     }
   
     render(){
-        // TODO: state.error == true, show message
-        // TODO: state.ready == show result?
-        return <h1>Hello World</h1>
+        const {error, errorMessage, ready} = this.state;
+
+        return <Fragment>
+            { error && <h2>{errorMessage}</h2> }
+
+            { !ready && !error && <h2>Add a loading message / indicator that the dapp is checking whether the code is valid or not </h2> }
+            
+            { ready && <h2>Add a message indicating that the code has been received, and we're processing the trx</h2> }
+        </Fragment>
     }
   }
   
