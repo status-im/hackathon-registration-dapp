@@ -3,9 +3,8 @@ import ReactDOM from 'react-dom';
 import EmbarkJS from 'Embark/EmbarkJS';
 import web3 from 'Embark/web3'
 import merkleData from './merkle';
-const { sha3 } = require('ethereumjs-util');
-
-
+import { sha3 } from 'ethereumjs-util';
+import merkle from 'merkle-tree-solidity';
 import SNTGiveaway from 'Embark/contracts/SNTGiveaway';
 import SNT from 'Embark/contracts/SNT';
 
@@ -16,7 +15,13 @@ class App extends React.Component {
 
     constructor(props) {
       super(props);
+
+      this.state = {
+        error: false,
+        errorMessage: ''
+      };
     }
+    
 
     componentDidMount(){
         EmbarkJS.onReady(async (error) => {
@@ -25,18 +30,21 @@ class App extends React.Component {
                 return;
             }
 
-
             const code = location.hash.replace("#");        // QR code value, i.e.: a8cd4b33bc
-            const hashedCode = sha3(code);                  // Code converted to format used on merkletree
             const accounts = await web3.eth.getAccounts();
 
             web3.eth.defaultAccount = accounts[0];
 
+            if(!code) {
+                this.setState({error: true, errorMessage: "Code is required"});
+                return;
+            }
+            
+            const merkleTree = new merkle(merkleData.elements);
+            const hashedCode = sha3(code);                  // Code converted to format used on merkletree
+            const proof = merkleTree.getProof(hashedCode);
 
 
-
-            // TODO: if code is empty show error or something
-            // TODO: Build merkle tree using merkledata.elements   (see https://github.com/ameensol/merkle-tree-solidity)
             // TODO: Call the contract function validRequest(bytes32[] _proof, bytes5 _code, address _dest)
             //          The values to send are, a merkle proof, code, and the web3.eth.defaultAccount.   
             //          The merkle proof function uses a bytes32 hash, so you need to use hashedCode
@@ -52,16 +60,13 @@ class App extends React.Component {
             //             
 
             // We'll deal with the redirect to ENS Registration after the previous code is implemented, and the background service is done processing the transaction
-
-
-
         });
         
     }
   
     render(){
-     return <h1>Hello World</h1>
-        
+        // TODO: manage errors
+        return <h1>Hello World</h1>
     }
   }
   
