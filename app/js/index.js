@@ -46,8 +46,7 @@ class App extends React.Component {
     async redirectIfProcessed(code){
         const sentToAddress =  await SNTGiveaway.methods.sentToAddress(web3.eth.defaultAccount).call();
         const usedCode =  await SNTGiveaway.methods.codeUsed( '0x' + code,).call();
-
-        if(sentToAddress || usedCode){
+        if(sentToAddress && usedCode){
             this.setState({showENSLink: true});
         }
     }
@@ -94,12 +93,11 @@ class App extends React.Component {
                 }
 
                 const response = await axios.post('http://localhost:3000/requestFunds/', record);
-
-                console.log(response);
+                if(response.data.error){
+                    this.setState({error: true, errorMessage: response.data.message});
+                }
 
                 // TODO: avoid people spamming with localstorage
-            } else {
-                console.log("Transaction already exists");
             }
 
             setInterval(async () => {
@@ -119,7 +117,7 @@ class App extends React.Component {
 
             { !ready && !error && <h2>Add a loading message / indicator that the dapp is checking whether the code is valid or not </h2> }
             
-            { ready  && !showENSLink && <h2>Add a message indicating that the code has been received, and we're processing the trx</h2> }
+            { ready && !error && !showENSLink && <h2>Add a message indicating that the code has been received, and we're processing the trx</h2> }
 
             { showENSLink && !error && <h2>Show link or redirect to ENS DAPP</h2> }
         </Fragment>

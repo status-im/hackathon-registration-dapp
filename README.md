@@ -24,7 +24,7 @@ To generate the codes, execute `node server/codegen.js`. This comand will output
 A nodejs service was created to receive funding requests. It requires a geth light node to run
 0. `chmod 600 server/config.js`
 1. Edit `server/config.js` and set the contract address and the private key of the controller address.
-2. `npm start`
+2. `node server/main.js`
 
 ### Running the dapp.
 0. `embark run`
