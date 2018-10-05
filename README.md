@@ -12,17 +12,23 @@ cd hackathon-registration-dapp
 npm install
 ```
 
-### Setup
-1. Edit config/blockchain.js and set the address and password that will be used as the controller of the contract
-2. Edit server/config.js, and set the SNTGiveaway contract address, and the controller address
+### Contracts
+TODO
 
+Send enough SNT/ETH to the contract address. These funds are going to be distributed.
 
 ### Generating codes
-To generate the codes, `node server/codegen.js` will generate a `codes.txt` file, and the proof and merkle root used for the contract
+To generate the codes, execute `node server/codegen.js`. This comand will output a `codes.txt` file, and the proof and merkle root used for the contract
+
+### Background service
+A nodejs service was created to receive funding requests. It requires a geth light node to run
+0. `chmod 600 server/config.js`
+1. Edit `server/config.js` and set the contract address and the private key of the controller address.
+2. `npm start`
 
 ### Running the dapp.
-```
-embark run
-```
+0. `embark run`
+1. Browse  http://localhost:8000/index.htm?CODE_TO_REDEEM
+
 
 
