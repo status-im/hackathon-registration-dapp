@@ -7,15 +7,7 @@ import { sha3 } from 'ethereumjs-util';
 import merkle from 'merkle-tree-solidity';
 import SNTGiveaway from 'Embark/contracts/SNTGiveaway';
 import SNT from 'Embark/contracts/SNT';
-import IPFS from 'ipfs';
-import OrbitDB from 'orbit-db';
-import { start } from 'ipfs/src/core/components';
-
-const ipfsOptions = {
-    EXPERIMENTAL: {
-      pubsub: true
-    }
-};
+import axios from 'axios';
 
 window.SNTGiveaway = SNTGiveaway;
 window.SNT = SNT;
@@ -27,7 +19,8 @@ class App extends React.Component {
       this.state = {
         error: false,
         errorMessage: '',
-        ready: false
+        ready: false,
+        showENSLink: false
       };
     }
 
@@ -40,36 +33,27 @@ class App extends React.Component {
                 return;
             }
 
-            const ipfs = new IPFS(ipfsOptions)
-
-            ipfs.on('error', (e) => {
+            try {
+                await this.start();
+            } catch (error) {
                 this.setState({error: true, errorMessage: "Error loading the DAPP - Contact your nearest Status Core Developer"});
-                console.error(e);
-            });
-
-            ipfs.on('ready', async () => {
-                try {
-                    const orbitdb = new OrbitDB(ipfs);
-                    await this.start(orbitdb);
-                } catch (error) {
-                    this.setState({error: true, errorMessage: "Error loading the DAPP - Contact your nearest Status Core Developer"});
-                    console.error(error);
-                    return;
-                }
-            });
+                console.error(error);
+                return;
+            }
         });
     }
 
     async redirectIfProcessed(code){
         const sentToAddress =  await SNTGiveaway.methods.sentToAddress(web3.eth.defaultAccount).call();
         const usedCode =  await SNTGiveaway.methods.codeUsed( '0x' + code,).call();
+
         if(sentToAddress || usedCode){
-            window.location = "http://status.im"; // TODO: redirect to ENS Registration DAPP URL
+            this.setState({showENSLink: true});
         }
     }
 
-    async start(orbitdb){
-        const code = location.hash.replace("#", '');        // QR code value, i.e.: a8cd4b33bc
+    async start(){
+        const code = location.search.replace("?", '');        // QR code value, i.e.: a8cd4b33bc
         const accounts = await web3.eth.getAccounts();
 
         web3.eth.defaultAccount = accounts[0];
@@ -90,55 +74,54 @@ class App extends React.Component {
             return;
         }
 
-        this.redirectIfProcessed(code);
+        await this.redirectIfProcessed(code);
 
-        const validRequest = await SNTGiveaway.methods.validRequest(proof, '0x' + code, web3.eth.defaultAccount).call();
-        if(!validRequest){
-            this.setState({error: true, errorMessage: "Invalid Code"});
-            console.error("Code not found in contract's merkle root");
-            return;
-        }
-
-        // Create / Open a database
-        const transactionsDb = await orbitdb.keyvalue("/orbitdb/QmVL48QDwdagfGnwcasTxuGTynTxpzJbiZVgLwoiW7Cg7e/status-hackathon-transactions2");
-        await transactionsDb.load();
-        
-        const transaction = await transactionsDb.get(code);
-        if(!transaction){
-            const fundRequestsDB = await orbitdb.log("/orbitdb/QmQ7dJmRiCwWGNgjDoUKX9xhdVA8vcS92R1h8S4uj1sm6v/status-hackathon-fund-requests2");
-            await fundRequestsDB.load();
-
-            const record = {
-                code,
-                address: web3.eth.defaultAccount,
-                proof: proof.map(x => '0x' + x.toString('hex'))
+        if(!this.state.showENSLink){
+            const validRequest = await SNTGiveaway.methods.validRequest(proof, '0x' + code, web3.eth.defaultAccount).call();
+            if(!validRequest){
+                this.setState({error: true, errorMessage: "Invalid Code"});
+                console.error("Request is not valid according to contract");
+                return;
             }
 
-            const hash = await fundRequestsDB.add(record)
+            // Create / Open a database
+            const response = await axios.get('http://localhost:3000/isProcessing/' + code); // TODO: extract to config
+            if(!response.data.result){
+                const record = {
+                    code,
+                    address: web3.eth.defaultAccount,
+                    proof: proof.map(x => '0x' + x.toString('hex'))
+                }
 
-            console.log(hash);
+                const response = await axios.post('http://localhost:3000/requestFunds/', record);
 
-            // TODO: avoid people spamming with localstorage
+                console.log(response);
+
+                // TODO: avoid people spamming with localstorage
+            } else {
+                console.log("Transaction already exists");
+            }
+
+            setInterval(async () => {
+                await this.redirectIfProcessed(code);
+            }, 10000);
         }
-
-        // Listen for updates
-        transactionsDb.events.on('replicated', (address) => {
-            this.redirectIfProcessed(code);
-        });
 
 
         this.setState({ready: true});
     }
   
     render(){
-        const {error, errorMessage, ready} = this.state;
+        const {error, errorMessage, ready, showENSLink} = this.state;
 
         return <Fragment>
             { error && <h2>{errorMessage}</h2> }
 
             { !ready && !error && <h2>Add a loading message / indicator that the dapp is checking whether the code is valid or not </h2> }
             
-            { ready && <h2>Add a message indicating that the code has been received, and we're processing the trx</h2> }
+            { ready  && !showENSLink && <h2>Add a message indicating that the code has been received, and we're processing the trx</h2> }
+
+            { showENSLink && !error && <h2>Show link or redirect to ENS DAPP</h2> }
         </Fragment>
     }
   }

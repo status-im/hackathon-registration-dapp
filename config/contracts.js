@@ -54,7 +54,7 @@ module.exports = {
         ]
       },
       "SNTGiveaway": {
-        args: ["$SNT", "10", "10", merkle.merkleRoot]
+        args: ["$SNT", "10", "10", merkle.merkleRoot],
       }
     }
   },
@@ -77,6 +77,28 @@ module.exports = {
   // merges with the settings in default
   // used with "embark run testnet"
   testnet: {
+    // Blockchain node to deploy the contracts
+    deployment: {
+      accounts: [
+        {
+          privateKey: "0x....."
+        }
+      ]
+    },    
+    contracts: {
+      "MiniMeTokenFactory": {
+        address: "0xa1c957C0210397D2d0296341627B74411756d476"
+      },
+      "SNT": {
+        address: "0xc55cf4b03948d7ebc8b9e8bad92643703811d162"
+      },
+      "MerkleProof": {
+        deploy: false,
+      },
+      "SNTGiveaway": {
+        address:"0x39b9829BD5daF434d78d1Ed7173222870046678D"
+      }
+    }
   },
 
   // merges with the settings in default

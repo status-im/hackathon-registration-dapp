@@ -3,7 +3,7 @@ const MerkleTree = require('merkle-tree-solidity');
 const { sha3 } = require('ethereumjs-util');
 const fs = require('fs');
 
-const numCodes = 10;
+const numCodes = 500;
 const codeLength = 5;
 
 const codes = [];
