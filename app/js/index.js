@@ -140,11 +140,11 @@ class App extends React.Component {
                 messageBody = <p>Please ask a volunteer for help in person.</p>;
                 break;
             case "yellow":
-                messageTitle = "You've already been funded";
+                messageTitle = "You've already been funded!";
                 messageBody = <p>We're redirecting you to ENS to register your own username! Ask a volunteer for help if you get lost.</p>
                 break;
             case "green":
-                messageTitle = "Great success! Such future";
+                messageTitle = "Great success! Such future!";
                 messageBody = <p>We're redirecting you to ENS to register your own username! Ask a volunteer for help if you get lost.</p>
                 break;
         }

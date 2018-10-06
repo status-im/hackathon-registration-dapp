@@ -59,7 +59,7 @@
 }
 
 .yellow {
-    background: #ffff00;
+    background: #faff00;
     color: #000000;
 }
 
@@ -69,7 +69,7 @@
 }
 
 .green {
-    background: #00ff00;
+    background: #00ff66;
     color: #000000;
 }
 
@@ -84,7 +84,7 @@
 
 .yellow .message-title {
     background: #000000;
-    color: #ffff00;
+    color: #faff00;
 }
 
 .yellow .message-body {
