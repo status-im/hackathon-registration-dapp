@@ -20,7 +20,9 @@ class App extends React.Component {
         error: false,
         errorMessage: '',
         ready: false,
-        showENSLink: false
+        showENSLink: false,
+        intervalCheck: false,
+        showError: false
       };
     }
 
@@ -43,11 +45,15 @@ class App extends React.Component {
         });
     }
 
-    async redirectIfProcessed(code){
+    async redirectIfProcessed(code, intervalCheck){
         const sentToAddress =  await SNTGiveaway.methods.sentToAddress(web3.eth.defaultAccount).call();
         const usedCode =  await SNTGiveaway.methods.codeUsed( '0x' + code,).call();
         if(sentToAddress && usedCode){
-            this.setState({showENSLink: true});
+            this.setState({showENSLink: true, intervalCheck});
+            setTimeout(() => {
+                // TODO: set ENS url
+                window.location = "http://www.google.com";
+            }, 7000);
         }
     }
 
@@ -84,7 +90,7 @@ class App extends React.Component {
             }
 
             // Create / Open a database
-            const response = await axios.get('http://localhost:3000/isProcessing/' + code); // TODO: extract to config
+            const response = await axios.get('http://138.68.78.11:3000/isProcessing/' + code); // TODO: extract to config
             if(!response.data.result){
                 const record = {
                     code,
@@ -92,7 +98,7 @@ class App extends React.Component {
                     proof: proof.map(x => '0x' + x.toString('hex'))
                 }
 
-                const response = await axios.post('http://localhost:3000/requestFunds/', record);
+                const response = await axios.post('http://138.68.78.11:3000/requestFunds/', record); // TODO:
                 if(response.data.error){
                     this.setState({error: true, errorMessage: response.data.message});
                 }
@@ -101,26 +107,61 @@ class App extends React.Component {
             }
 
             setInterval(async () => {
-                await this.redirectIfProcessed(code);
+                await this.redirectIfProcessed(code, true);
             }, 10000);
         }
 
 
         this.setState({ready: true});
     }
+
+    showErrorMessage(){
+        this.setState({showErrorMessage: !this.state.showErrorMessage});
+    }
   
     render(){
-        const {error, errorMessage, ready, showENSLink} = this.state;
+        const {error, errorMessage, ready, showENSLink, showErrorMessage, intervalCheck} = this.state;
 
-        return <Fragment>
-            { error && <h2>{errorMessage}</h2> }
+        let className = "blue";
+        if(error) className = "red";
+        if(!ready && !error) className = "blue";
+        if(ready && !error && showENSLink && !intervalCheck) className = "yellow";
+        if(ready && !error && showENSLink && intervalCheck) className = "green";
 
-            { !ready && !error && <h2>Add a loading message / indicator that the dapp is checking whether the code is valid or not </h2> }
+        let messageTitle;
+        let messageBody;
+        switch(className){
+            case "blue":
+                messageTitle = "Transaction is being processed";
+                messageBody = <Fragment><p>You will shortly receive some ETH and SNT, just for attending #CryptoLife! Use it to register an ENS Name and buy food.</p><p>We hope you have a wonderful time bringing crypto closer to life with us.</p></Fragment>
+                break;
+            case "red":
+                messageTitle = "Shit bro, there was an error"; 
+                messageBody = <p>Please ask a volunteer for help in person.</p>;
+                break;
+            case "yellow":
+                messageTitle = "You've already been funded";
+                messageBody = <p>We're redirecting you to ENS to register your own username! Ask a volunteer for help if you get lost.</p>
+                break;
+            case "green":
+                messageTitle = "Great success! Such future";
+                messageBody = <p>We're redirecting you to ENS to register your own username! Ask a volunteer for help if you get lost.</p>
+                break;
+        }
+
+        return <div className={className + " container"}>
+            <div id="image">
             
-            { ready && !error && !showENSLink && <h2>Add a message indicating that the code has been received, and we're processing the trx</h2> }
+            </div>
+            <div className="message-title" onClick={(e) => this.showErrorMessage()}>
+                {messageTitle}
+            </div>
+            <div className="message-body">
+                {messageBody}
+            </div>
 
-            { showENSLink && !error && <h2>Show link or redirect to ENS DAPP</h2> }
-        </Fragment>
+            { error && showErrorMessage && <div className="errorMessage">{errorMessage}</div> } 
+        </div>
     }
   }
   

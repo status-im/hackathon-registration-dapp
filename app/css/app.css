@@ -1,0 +1,132 @@
+@font-face {
+    font-family: 'Andale Mono';
+    src: url('../fonts/AndaleMono.woff2') format('woff2'),
+        url('../fonts/AndaleMono.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Noto Sans';
+    src: url('../fonts/NotoSans-SemiBold.woff2') format('woff2'),
+        url('../fonts/NotoSans-SemiBold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Noto Sans';
+    src: url('../fonts/NotoSans-Medium.woff2') format('woff2'),
+        url('../fonts/NotoSans-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-family: "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.message-title {
+    width: 75%;
+    margin: auto;
+    padding: 1em 2em;
+    text-align: center;
+}
+
+.message-body {
+    text-align: center;
+    margin: auto;
+    width: 75%;
+}
+
+.errorMessage {
+    background: #ffffff;
+    color: #000000;
+    padding: 1em 2em;
+    width: 75%;
+    margin: 50px auto 0px auto;    
+    text-align: center;
+}
+
+.red {
+    background: #ff0000;
+    color: #ffffff;
+}
+
+.yellow {
+    background: #ffff00;
+    color: #000000;
+}
+
+.blue {
+    background: #0000ff;
+    color: #ffffff;
+}
+
+.green {
+    background: #00ff00;
+    color: #000000;
+}
+
+.green .message-title {
+    background: #000000;
+    color: #ffffff;
+}
+
+.green .message-body {
+    color: #000000;
+}
+
+.yellow .message-title {
+    background: #000000;
+    color: #ffff00;
+}
+
+.yellow .message-body {
+    color: #000000;
+}
+
+.red .message-title {
+    background: #ffffff;
+    color: #ff0000;
+}
+
+.red .message-body {
+    color: #ffffff;
+}
+
+.blue .message-title {
+    background: #ffffff;
+    color: #0000ff;
+}
+
+.blue .message-body {
+    color: #ffffff;
+}
+
+#image {
+    height: 375px;
+    width: 375px;
+    margin: auto;
+}
+
+.red #image {
+    background: url(../images/red.gif) no-repeat center center;
+}
+
+.blue #image {
+    background: url(../images/blue.gif) no-repeat center center;
+}
+
+.green #image {
+    background: url(../images/green.gif) no-repeat center center;
+}
+
+.yellow #image {
+    background: url(../images/yellow.gif) no-repeat center center;
+}

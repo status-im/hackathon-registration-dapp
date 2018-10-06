@@ -4,6 +4,7 @@
     "css/app.css": ["app/css/**"],
     "js/app.js": ["app/js/index.js"],
     "images/": ["app/images/**"],
+    "fonts/": ["app/fonts/**"],
     "index.html": "app/index.html"
   },
   "buildDir": "dist/",
