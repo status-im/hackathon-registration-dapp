@@ -7,7 +7,11 @@ const bodyParser = require('body-parser');
 const low = require('lowdb');
 const _ = require('lodash');
 const FileAsync = require('lowdb/adapters/FileAsync')
-const adapter = new FileAsync('db.json')
+const adapter = new FileAsync('db.json');
+const merkleData = require('./merkle');
+const { sha3 } = require('ethereumjs-util');
+const merkle = require('merkle-tree-solidity');
+
 
 const abiDefinition = [ { "constant": false, "inputs": [ { "name": "_newController", "type": "address" } ], "name": "changeController", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function", "signature": "0x3cebb823" }, { "constant": true, "inputs": [ { "name": "", "type": "bytes5" } ], "name": "codeUsed", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0x723de5cd" }, { "constant": false, "inputs": [ { "name": "_proof", "type": "bytes32[]" }, { "name": "_code", "type": "bytes5" }, { "name": "_dest", "type": "address" } ], "name": "processRequest", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function", "signature": "0x72d209f5" }, { "constant": true, "inputs": [], "name": "sntAmount", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0x7f58fa14" }, { "constant": true, "inputs": [ { "name": "", "type": "address" } ], "name": "sentToAddress", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0x81e8706d" }, { "constant": false, "inputs": [], "name": "boom", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function", "signature": "0xa169ce09" }, { "constant": false, "inputs": [ { "name": "_ethAmount", "type": "uint256" }, { "name": "_sntAmount", "type": "uint256" }, { "name": "_root", "type": "bytes32" } ], "name": "updateSettings", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function", "signature": "0xa4438334" }, { "constant": true, "inputs": [ { "name": "_proof", "type": "bytes32[]" }, { "name": "_code", "type": "bytes5" }, { "name": "_dest", "type": "address" } ], "name": "validRequest", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0xadb187bb" }, { "constant": true, "inputs": [], "name": "SNT", "outputs": [ { "name": "", "type": "address" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0xc55a02a0" }, { "constant": true, "inputs": [], "name": "ethAmount", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0xc98166c0" }, { "constant": true, "inputs": [], "name": "root", "outputs": [ { "name": "", "type": "bytes32" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0xebf0c717" }, { "constant": true, "inputs": [], "name": "controller", "outputs": [ { "name": "", "type": "address" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0xf77c4791" }, { "inputs": [ { "name": "_sntAddress", "type": "address" }, { "name": "_ethAmount", "type": "uint256" }, { "name": "_sntAmount", "type": "uint256" }, { "name": "_root", "type": "bytes32" } ], "payable": false, "stateMutability": "nonpayable", "type": "constructor", "signature": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "dest", "type": "address" }, { "indexed": false, "name": "code", "type": "bytes5" }, { "indexed": false, "name": "ethAmount", "type": "uint256" }, { "indexed": false, "name": "sntAmount", "type": "uint256" } ], "name": "AddressFunded", "type": "event", "signature": "0x0aa7ecfdc9fd3f39ab380a0b6413557f94ed0dfd05ed31c925521736fa750eac" } ] ;
 
@@ -67,7 +71,19 @@ const process = async (request) => {
         return {"error": true, message};
     }
 
-    const validRequest =  await contract.methods.validRequest(request.proof, '0x' + request.code, request.address).call();
+    const merkleTree = new merkle.default(merkleData.elements);
+    const hashedCode = sha3('0x' + request.code);   
+
+    let proof;
+    try {
+        proof = merkleTree.getProof(hashedCode).map(x => "0x" + x.toString('hex'));
+    } catch(error){
+        const message = "Invalid Request - " + request.address + " - 0x" + request.code;
+        console.warn(message);
+        return {"error": true, message};
+    }
+
+    const validRequest =  await contract.methods.validRequest(proof, '0x' + request.code, request.address).call();
     if(!validRequest){
         const message = "Invalid Request - " + request.address + " - 0x" + request.code;
         console.warn(message);
@@ -86,7 +102,7 @@ const process = async (request) => {
         const gasPrice = await web3.eth.getGasPrice();
 
         // Execute the contract function
-        const toSend = contract.methods.processRequest(request.proof, '0x' + request.code, request.address);
+        const toSend = contract.methods.processRequest(proof, '0x' + request.code, request.address);
 
         const estimatedGas = await toSend.estimateGas({from: account.address});
 
@@ -137,7 +153,7 @@ events.on('web3:connected', () => {
     const router = express.Router();
     router.post('/requestFunds', asyncMiddleware(async (req, res) => {
         const request = req.body;
-        if(request.code && request.proof && request.address) {
+        if(request.code && request.address) {
             const result = await process(request);
             res.status(200)
             .send(result);

@@ -26,7 +26,7 @@ stream1.once('open', function(fd) {
     stream1.end();
 });
 
-const stream2 = fs.createWriteStream("./app/js/merkle.js");
+const stream2 = fs.createWriteStream("./server/merkle.js");
 stream2.once('open', function(fd) {
     stream2.write("module.exports = {\n");
     stream2.write("\tmerkleRoot: '0x" + merkleTree.getRoot().toString('hex') + "',\n");
@@ -41,4 +41,4 @@ stream2.once('open', function(fd) {
 
 console.log("Merkle Root: 0x%s", merkleTree.getRoot().toString('hex'));
 console.log("./codes.txt generated");
-console.log("./app/js/merkle.js generated");
+console.log("./server/merkle.js generated");

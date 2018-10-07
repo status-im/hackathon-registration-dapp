@@ -2,12 +2,10 @@ import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import EmbarkJS from 'Embark/EmbarkJS';
 import web3 from 'Embark/web3'
-import merkleData from './merkle';
-import { sha3 } from 'ethereumjs-util';
-import merkle from 'merkle-tree-solidity';
 import SNTGiveaway from 'Embark/contracts/SNTGiveaway';
 import SNT from 'Embark/contracts/SNT';
 import axios from 'axios';
+import config from './config';
 
 window.SNTGiveaway = SNTGiveaway;
 window.SNT = SNT;
@@ -51,14 +49,13 @@ class App extends React.Component {
         if(sentToAddress && usedCode){
             this.setState({showENSLink: true, intervalCheck});
             setTimeout(() => {
-                // TODO: set ENS url
-                window.location = "http://www.google.com";
+                window.location = config.ENSDappURL;
             }, 7000);
         }
     }
 
     async start(){
-        const code = location.search.replace("?", '');        // QR code value, i.e.: a8cd4b33bc
+        const code = location.search.replace("?", '');
         const accounts = await web3.eth.getAccounts();
 
         web3.eth.defaultAccount = accounts[0];
@@ -67,38 +64,18 @@ class App extends React.Component {
             this.setState({error: true, errorMessage: "Code is required"});
             return;
         }
-        const merkleTree = new merkle(merkleData.elements);
-        const hashedCode = sha3('0x' + code);   
-
-        let proof;
-        try {
-            proof = merkleTree.getProof(hashedCode);
-        } catch(error){
-            this.setState({error: true, errorMessage: "Invalid Code"});
-            console.log(error);
-            return;
-        }
-
+        
         await this.redirectIfProcessed(code);
 
         if(!this.state.showENSLink){
-            const validRequest = await SNTGiveaway.methods.validRequest(proof, '0x' + code, web3.eth.defaultAccount).call();
-            if(!validRequest){
-                this.setState({error: true, errorMessage: "Invalid Code"});
-                console.error("Request is not valid according to contract");
-                return;
-            }
-
-            // Create / Open a database
-            const response = await axios.get('http://138.68.78.11:3000/isProcessing/' + code); // TODO: extract to config
+            const response = await axios.get(config.APIServer + '/isProcessing/' + code);
             if(!response.data.result){
                 const record = {
                     code,
-                    address: web3.eth.defaultAccount,
-                    proof: proof.map(x => '0x' + x.toString('hex'))
+                    address: web3.eth.defaultAccount
                 }
 
-                const response = await axios.post('http://138.68.78.11:3000/requestFunds/', record); // TODO:
+                const response = await axios.post(config.APIServer + '/requestFunds/', record);
                 if(response.data.error){
                     this.setState({error: true, errorMessage: response.data.message});
                 }

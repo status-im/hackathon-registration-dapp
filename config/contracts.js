@@ -1,5 +1,5 @@
 
-const merkle = require("../app/js/merkle.js");
+const merkle = require("../server/merkle.js");
 
 module.exports = {
   // default applies to all environments
