@@ -73,6 +73,7 @@ module.exports = {
   testnet: {
     networkType: "testnet",
     syncMode: "light",
+    wsOrigins: "http://localhost:8000,embark",
     account: {
       password: "config/testnet/password"
     }

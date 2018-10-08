@@ -1,7 +1,7 @@
 module.exports = {
   // default applies to all environments
   default: {
-    enabled: true,
+    enabled: false,
     ipfs_bin: "ipfs",
     provider: "ipfs",
     available_providers: ["ipfs"],

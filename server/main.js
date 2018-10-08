@@ -177,7 +177,7 @@ events.on('web3:connected', () => {
 
     app.use(bodyParser.urlencoded({extended: false}));
     app.use(bodyParser.json());
-    app.use('/', router);
+    app.use('/api/', router);
 
     app.listen(port, () => {
         console.log('Server listening on port ' + port);
