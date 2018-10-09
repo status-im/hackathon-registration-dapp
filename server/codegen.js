@@ -21,7 +21,7 @@ const merkleTree = new MerkleTree.default(elements);
 const stream1 = fs.createWriteStream("codes.txt");
 stream1.once('open', function(fd) {
     codes.map(el => {
-        stream1.write("https://get.status.im/browse/cryptolife.status.im/%3f" + el + "\n");
+        stream1.write("https://get.status.im/browse/cryptolife.status.im/?" + el + "\n");
     })
     stream1.end();
 });
