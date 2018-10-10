@@ -1,7 +1,6 @@
 const Web3 = require('web3');
 const EventEmitter = require('events');
 const config = require('./config');
-const Tx = require('ethereumjs-tx');
 const express = require('express');
 const bodyParser = require('body-parser');
 const low = require('lowdb');
@@ -19,16 +18,20 @@ const events = new EventEmitter();
 
 let contract;
 
-const privateKey = Buffer.from(config.controllerPrivK.substr(2), 'hex');
 const web3 = new Web3(new Web3.providers.WebsocketProvider(config.connectionURL, {headers: {Origin: "embark"}}));
 const account = web3.eth.accounts.privateKeyToAccount(config.controllerPrivK);
+
 
 web3.eth.net.isListening()
 .then(async () => {
 
     console.log("Connected to WEB3: '" + config.connectionURL + "'");
+
     contract = new web3.eth.Contract(abiDefinition, config.contractAddress);
     console.log("Using account: " + account.address);
+
+    web3.eth.accounts.wallet.add(account);
+    
     events.emit('web3:connected')
 })
 .catch(error => {
@@ -106,10 +109,7 @@ const process = async (request) => {
 
         const estimatedGas = await toSend.estimateGas({from: account.address});
 
-        const nonce = await web3.eth.getTransactionCount(account.address);
-
-        const rawTx = {
-            nonce: web3.utils.toHex(nonce),
+        const tx = {
             gasPrice: web3.utils.toHex(parseInt(gasPrice)),
             gasLimit: web3.utils.toHex(estimatedGas + 1000),
             from: account.address,
@@ -117,12 +117,9 @@ const process = async (request) => {
             value: "0x00",
             data: toSend.encodeABI()
         }
-        
-        const tx = new Tx(rawTx);
-        tx.sign(privateKey);
-        const serializedTx = tx.serialize();
-
-        web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
+                
+       
+        web3.eth.sendTransaction(tx)
             .on('transactionHash', async (hash) => {
                 trxRecord[request.code].transactionHash = hash;
                 trxRecord[request.code].transactionTimestamp = Math.floor(Date.now());

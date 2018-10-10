@@ -27,6 +27,8 @@ module.exports = {
     targetGasLimit: 8000000, // Target gas limit sets the artificial target gas floor for the blocks to mine
     simulatorMnemonic: "example exile argue silk regular smile grass bomb merge arm assist farm", // Mnemonic  used by the simulator to generate a wallet
     simulatorBlocktime: 0, // Specify blockTime in seconds for automatic mining. Default is 0 and no auto-mining.
+    rpcCorsDomain: "*",
+    wsOrigins: "*",
     account: {
       // numAccounts: 3, // When specified, creates accounts for use in the dapp. This option only works in the development environment, and can be used as a quick start option that bypasses the need for MetaMask in development. These accounts are unlocked and funded with the below settings.
       // password: "config/development/password", // Password for the created accounts (as specified in the `numAccounts` setting). If `mineWhenNeeded` is enabled (and isDev is not), this password is used to create a development account controlled by the node.
