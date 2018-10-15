@@ -113,7 +113,7 @@ class App extends React.Component {
                 messageBody = <Fragment><p>You will shortly receive some ETH and SNT, just for attending #CryptoLife! Use it to register an ENS Name and buy food.</p><p>We hope you have a wonderful time bringing crypto closer to life with us.</p></Fragment>
                 break;
             case "red":
-                messageTitle = "Shit bro, there was an error"; 
+                messageTitle = "Shit, there was an error"; 
                 messageBody = <p>Please ask a volunteer for help in person.</p>;
                 break;
             case "yellow":

@@ -110,8 +110,8 @@ const process = async (request) => {
         const estimatedGas = await toSend.estimateGas({from: account.address});
 
         const tx = {
-            gasPrice: web3.utils.toHex(parseInt(gasPrice)),
-            gasLimit: web3.utils.toHex(estimatedGas + 1000),
+            gasPrice: parseInt(gasPrice),
+            gas: estimatedGas + 1000,
             from: account.address,
             to: config.contractAddress,
             value: "0x00",
