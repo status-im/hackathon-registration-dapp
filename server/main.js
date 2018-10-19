@@ -53,10 +53,7 @@ const isProcessing = async(code) => {
     db.defaults({transactions: {}}).write();
     const record = await db.get('transactions.' + code).value();
 
-    
-
-
-    return record && record.transactionTimestamp < ((new Date()).getTime() - min3)? true : false;
+    return record && record.transactionTimestamp > ((new Date()).getTime() - min3)? true : false;
 };
 
 
@@ -73,14 +70,10 @@ const process = async (request) => {
     const codeUsed = await contract.methods.codeUsed('0x' + request.code).call();
 
     if(sentToAddress || codeUsed){
-        const message = "Transaction already exists";
-        console.warn(message + " - sentToAddress: " + sentToAddress + " , codeUsed: " +codeUsed);
+        const message = "Transaction already exists - sentToAddress: " + sentToAddress + " , codeUsed: " +codeUsed;
+        console.warn(message);
         return {"error": true, message};
     }
-
-    console.log(record);
-    console.log(recordByAddress);
-
 
     if(record && record.transactionTimestamp >  ((new Date()).getTime() - min3) ) {
         const message = "Transaction already exists for code: " + request.code;

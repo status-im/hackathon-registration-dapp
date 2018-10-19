@@ -3,8 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "test": "embark test",
-    "start": "nodemon server/main.js"
+    "test": "embark test"
   },
   "author": "",
   "license": "ISC",
