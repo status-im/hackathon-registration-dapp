@@ -10,6 +10,30 @@ import config from './config';
 window.SNTGiveaway = SNTGiveaway;
 window.SNT = SNT;
 
+
+window.addEventListener('load', async () => {
+    // Modern dapp browsers...
+    if (window.ethereum) {
+        window.web3 = new Web3(ethereum);
+        try {
+            // Request account access if needed
+            await ethereum.enable();
+        } catch (error) {
+            alert('Access to ETH wallet required to send funds');
+        }
+    }
+    // Legacy dapp browsers...
+    else if (window.web3) {
+        window.web3 = new Web3(web3.currentProvider);
+    }
+    // Non-dapp browsers...
+    else {
+        alert('Non-Ethereum browser detected. You should consider using Status.im!');
+    }
+
+});
+
+
 class App extends React.Component {
 
     constructor(props) {
@@ -25,30 +49,7 @@ class App extends React.Component {
     }
 
     componentDidMount(){
-        window.addEventListener('load', async () => {
-            // Modern dapp browsers...
-            if (window.ethereum) {
-                window.web3 = new Web3(ethereum);
-                try {
-                    // Request account access if needed
-                    await ethereum.enable();
-                    
-                    this.setup();
-                } catch (error) {
-                    this.setState({error: true, errorMessage: 'Access to ETH wallet required to send funds'});
-                }
-            }
-            // Legacy dapp browsers...
-            else if (window.web3) {
-                window.web3 = new Web3(web3.currentProvider);
-                this.setup();
-            }
-            // Non-dapp browsers...
-            else {
-                this.setState({error: true, errorMessage: 'Non-Ethereum browser detected. You should consider using Status.im!'});
-            }
-
-        });
+       this.setup();
     }
 
     setup(){
@@ -64,7 +65,7 @@ class App extends React.Component {
 
             if(error){
                 this.setState({error: true, errorMessage: "Error loading the DAPP - Contact your nearest Status Core Developer"});
-                console.error(error);
+                alert(error);
                 return;
             }
 
@@ -76,7 +77,7 @@ class App extends React.Component {
                 } else {
                     this.setState({error: true, errorMessage: error.message});
                 }
-                console.error(error);
+                alert(error);
                 return;
             }
         });
