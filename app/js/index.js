@@ -36,7 +36,12 @@ class App extends React.Component {
             try {
                 await this.start();
             } catch (error) {
-                this.setState({error: true, errorMessage: "Error loading the DAPP - Contact your nearest Status Core Developer"});
+                if(error.response && error.response.data){
+                    this.setState({error: true, errorMessage: error.response.data});
+                } else {
+                    this.setState({error: true, errorMessage: error.message});
+                }
+                console.dir(error);
                 console.error(error);
                 return;
             }

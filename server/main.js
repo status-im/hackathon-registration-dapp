@@ -12,6 +12,8 @@ const { sha3 } = require('ethereumjs-util');
 const merkle = require('merkle-tree-solidity');
 
 
+const min3 =  3*60*1000;
+
 const abiDefinition = [ { "constant": false, "inputs": [ { "name": "_newController", "type": "address" } ], "name": "changeController", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function", "signature": "0x3cebb823" }, { "constant": true, "inputs": [ { "name": "", "type": "bytes5" } ], "name": "codeUsed", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0x723de5cd" }, { "constant": false, "inputs": [ { "name": "_proof", "type": "bytes32[]" }, { "name": "_code", "type": "bytes5" }, { "name": "_dest", "type": "address" } ], "name": "processRequest", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function", "signature": "0x72d209f5" }, { "constant": true, "inputs": [], "name": "sntAmount", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0x7f58fa14" }, { "constant": true, "inputs": [ { "name": "", "type": "address" } ], "name": "sentToAddress", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0x81e8706d" }, { "constant": false, "inputs": [], "name": "boom", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function", "signature": "0xa169ce09" }, { "constant": false, "inputs": [ { "name": "_ethAmount", "type": "uint256" }, { "name": "_sntAmount", "type": "uint256" }, { "name": "_root", "type": "bytes32" } ], "name": "updateSettings", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function", "signature": "0xa4438334" }, { "constant": true, "inputs": [ { "name": "_proof", "type": "bytes32[]" }, { "name": "_code", "type": "bytes5" }, { "name": "_dest", "type": "address" } ], "name": "validRequest", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0xadb187bb" }, { "constant": true, "inputs": [], "name": "SNT", "outputs": [ { "name": "", "type": "address" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0xc55a02a0" }, { "constant": true, "inputs": [], "name": "ethAmount", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0xc98166c0" }, { "constant": true, "inputs": [], "name": "root", "outputs": [ { "name": "", "type": "bytes32" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0xebf0c717" }, { "constant": true, "inputs": [], "name": "controller", "outputs": [ { "name": "", "type": "address" } ], "payable": false, "stateMutability": "view", "type": "function", "signature": "0xf77c4791" }, { "inputs": [ { "name": "_sntAddress", "type": "address" }, { "name": "_ethAmount", "type": "uint256" }, { "name": "_sntAmount", "type": "uint256" }, { "name": "_root", "type": "bytes32" } ], "payable": false, "stateMutability": "nonpayable", "type": "constructor", "signature": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "dest", "type": "address" }, { "indexed": false, "name": "code", "type": "bytes5" }, { "indexed": false, "name": "ethAmount", "type": "uint256" }, { "indexed": false, "name": "sntAmount", "type": "uint256" } ], "name": "AddressFunded", "type": "event", "signature": "0x0aa7ecfdc9fd3f39ab380a0b6413557f94ed0dfd05ed31c925521736fa750eac" } ] ;
 
 const events = new EventEmitter();
@@ -50,7 +52,11 @@ const isProcessing = async(code) => {
     const db = await low(adapter);
     db.defaults({transactions: {}}).write();
     const record = await db.get('transactions.' + code).value();
-    return record ? true : false;
+
+    
+
+
+    return record && record.transactionTimestamp < ((new Date()).getTime() - min3)? true : false;
 };
 
 
@@ -61,14 +67,28 @@ const process = async (request) => {
       .write();
 
     const record = await db.get('transactions.' + request.code).value();
-    if(record) {
+    const recordByAddress = _.filter(Object.values(await db.get('transactions').value()), {address: request.address});
+
+    const sentToAddress = await contract.methods.sentToAddress(request.address).call();
+    const codeUsed = await contract.methods.codeUsed('0x' + request.code).call();
+
+    if(sentToAddress || codeUsed){
+        const message = "Transaction already exists";
+        console.warn(message + " - sentToAddress: " + sentToAddress + " , codeUsed: " +codeUsed);
+        return {"error": true, message};
+    }
+
+    console.log(record);
+    console.log(recordByAddress);
+
+
+    if(record && record.transactionTimestamp >  ((new Date()).getTime() - min3) ) {
         const message = "Transaction already exists for code: " + request.code;
         console.warn(message);
         return {"error": true, message};
     }
 
-    const recordByAddress = _.filter(Object.values(await db.get('transactions').value()), {address: request.address});
-    if(recordByAddress.length){
+    if(recordByAddress.length && recordByAddress[0].transactionTimestamp >  ((new Date()).getTime() - min3)){
         const message = "Transaction already exists for address: " + request.address;
         console.warn(message);
         return {"error": true, message};
