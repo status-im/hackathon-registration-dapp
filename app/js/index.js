@@ -25,8 +25,43 @@ class App extends React.Component {
     }
 
     componentDidMount(){
+        window.addEventListener('load', async () => {
+            // Modern dapp browsers...
+            if (window.ethereum) {
+                window.web3 = new Web3(ethereum);
+                try {
+                    // Request account access if needed
+                    await ethereum.enable();
+                    
+                    this.setup();
+                } catch (error) {
+                    this.setState({error: true, errorMessage: 'Access to ETH wallet required to send funds'});
+                }
+            }
+            // Legacy dapp browsers...
+            else if (window.web3) {
+                window.web3 = new Web3(web3.currentProvider);
+                this.setup();
+            }
+            // Non-dapp browsers...
+            else {
+                this.setState({error: true, errorMessage: 'Non-Ethereum browser detected. You should consider using Status.im!'});
+            }
+
+        });
+    }
+
+    setup(){
         EmbarkJS.onReady(async (error) => {
-            
+            const accounts = await web3.eth.getAccounts();
+
+            if(!accounts.length){
+                this.setState({error: true, errorMessage: "No accounts are available"});
+                return;
+            }
+
+            web3.eth.defaultAccount = accounts[0];
+
             if(error){
                 this.setState({error: true, errorMessage: "Error loading the DAPP - Contact your nearest Status Core Developer"});
                 console.error(error);
@@ -41,16 +76,16 @@ class App extends React.Component {
                 } else {
                     this.setState({error: true, errorMessage: error.message});
                 }
-                console.dir(error);
                 console.error(error);
                 return;
             }
         });
     }
 
+
     async redirectIfProcessed(code, intervalCheck){
-        const sentToAddress =  await SNTGiveaway.methods.sentToAddress(web3.eth.defaultAccount).call();
-        const usedCode =  await SNTGiveaway.methods.codeUsed( '0x' + code,).call();
+        const sentToAddress =  await SNTGiveaway.methods.sentToAddress(web3.eth.defaultAccount).call({from: web3.eth.defaultAccount});
+        const usedCode =  await SNTGiveaway.methods.codeUsed( '0x' + code,).call({from: web3.eth.defaultAccount});
         if(sentToAddress && usedCode){
             this.setState({showENSLink: true, intervalCheck});
             setTimeout(() => {
