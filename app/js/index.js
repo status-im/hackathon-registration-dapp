@@ -28,14 +28,17 @@ class App extends React.Component {
     }
 
     componentDidMount(){
-        window.addEventListener('load', async () => {
+        EmbarkJS.onReady(async (error) => {
+            alert(1);
             // Modern dapp browsers...
             if (window.ethereum) {
+                alert(2);
                 window.web3 = new Web3(ethereum);
                 try {
+                    alert(3);
                     // Request account access if needed
                     await ethereum.enable();
-        
+        alert(4);
                     this.setup();
                 } catch (error) {
                     alert('Access to ETH wallet required to send funds');
@@ -54,7 +57,6 @@ class App extends React.Component {
     }
 
     setup(){
-        EmbarkJS.onReady(async (error) => {
             const accounts = await web3.eth.getAccounts();
 
             if(!accounts.length){
@@ -81,7 +83,6 @@ class App extends React.Component {
                 alert(error);
                 return;
             }
-        });
     }
 
 
