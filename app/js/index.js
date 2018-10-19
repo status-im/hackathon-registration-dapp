@@ -29,34 +29,6 @@ class App extends React.Component {
 
     componentDidMount(){
         EmbarkJS.onReady(async (error) => {
-            alert(1);
-            // Modern dapp browsers...
-            if (window.ethereum) {
-                alert(2);
-                window.web3 = new Web3(ethereum);
-                try {
-                    alert(3);
-                    // Request account access if needed
-                    await ethereum.enable();
-        alert(4);
-                    this.setup();
-                } catch (error) {
-                    alert('Access to ETH wallet required to send funds');
-                }
-            }
-            // Legacy dapp browsers...
-            else if (window.web3) {
-                window.web3 = new Web3(web3.currentProvider);
-                this.setup();
-            }
-            // Non-dapp browsers...
-            else {
-                alert('Non-Ethereum browser detected. You should consider using Status.im!');
-            }
-        });
-    }
-
-    setup(){
             const accounts = await web3.eth.getAccounts();
 
             if(!accounts.length){
@@ -80,11 +52,10 @@ class App extends React.Component {
                 } else {
                     this.setState({error: true, errorMessage: error.message});
                 }
-                alert(error);
                 return;
             }
+        });
     }
-
 
     async redirectIfProcessed(code, intervalCheck){
         const sentToAddress =  await SNTGiveaway.methods.sentToAddress(web3.eth.defaultAccount).call({from: web3.eth.defaultAccount});
