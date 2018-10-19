@@ -11,27 +11,6 @@ window.SNTGiveaway = SNTGiveaway;
 window.SNT = SNT;
 
 
-window.addEventListener('load', async () => {
-    // Modern dapp browsers...
-    if (window.ethereum) {
-        window.web3 = new Web3(ethereum);
-        try {
-            // Request account access if needed
-            await ethereum.enable();
-        } catch (error) {
-            alert('Access to ETH wallet required to send funds');
-        }
-    }
-    // Legacy dapp browsers...
-    else if (window.web3) {
-        window.web3 = new Web3(web3.currentProvider);
-    }
-    // Non-dapp browsers...
-    else {
-        alert('Non-Ethereum browser detected. You should consider using Status.im!');
-    }
-
-});
 
 
 class App extends React.Component {
@@ -49,7 +28,29 @@ class App extends React.Component {
     }
 
     componentDidMount(){
-       this.setup();
+        window.addEventListener('load', async () => {
+            // Modern dapp browsers...
+            if (window.ethereum) {
+                window.web3 = new Web3(ethereum);
+                try {
+                    // Request account access if needed
+                    await ethereum.enable();
+        
+                    this.setup();
+                } catch (error) {
+                    alert('Access to ETH wallet required to send funds');
+                }
+            }
+            // Legacy dapp browsers...
+            else if (window.web3) {
+                window.web3 = new Web3(web3.currentProvider);
+                this.setup();
+            }
+            // Non-dapp browsers...
+            else {
+                alert('Non-Ethereum browser detected. You should consider using Status.im!');
+            }
+        });
     }
 
     setup(){
