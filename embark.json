@@ -1,8 +1,8 @@
 {
   "contracts": ["contracts/**"],
   "app": {
-    "css/app.7.css": ["app/css/**"],
-    "js/dapp.7.js": ["app/js/index.js"],
+    "css/app.9.css": ["app/css/**"],
+    "js/dapp.9.js": ["app/js/index.js"],
     "images/": ["app/images/**"],
     "fonts/": ["app/fonts/**"],
     "index.html": "app/index.html"

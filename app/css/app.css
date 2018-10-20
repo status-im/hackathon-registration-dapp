@@ -131,3 +131,7 @@
 .yellow #image {
     background: url(../images/yellow.gif) no-repeat center center;
 }
+
+#image.no-show {
+    background: none !important;
+}

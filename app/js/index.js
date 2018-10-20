@@ -23,7 +23,8 @@ class App extends React.Component {
         ready: false,
         showENSLink: false,
         intervalCheck: false,
-        showError: false
+        showError: false,
+        noCode: false
       };
     }
 
@@ -75,7 +76,7 @@ class App extends React.Component {
         web3.eth.defaultAccount = accounts[0];
 
         if(!code) {
-            this.setState({error: true, errorMessage: "Code is required"});
+            this.setState({noCode: true});
             return;
         }
         
@@ -111,8 +112,9 @@ class App extends React.Component {
     }
   
     render(){
-        const {error, errorMessage, ready, showENSLink, showErrorMessage, intervalCheck} = this.state;
+        const {error, errorMessage, ready, showENSLink, showErrorMessage, intervalCheck, noCode} = this.state;
 
+        let showImage = true;
         let className = "blue";
         if(error) className = "red";
         if(!ready && !error) className = "blue";
@@ -123,8 +125,14 @@ class App extends React.Component {
         let messageBody;
         switch(className){
             case "blue":
-                messageTitle = "Transaction is being processed";
-                messageBody = <Fragment><p>You will shortly receive some ETH and SNT, just for attending #CryptoLife! Use it to register an ENS Name and buy food.</p><p>We hope you have a wonderful time bringing crypto closer to life with us.</p></Fragment>
+                if(noCode){
+                    showImage = false;
+                    messageTitle = "This is the #CryptoLife Registration DApp";
+                    messageBody = <p>Please scan one of the QR codes provided at the entrance to the event in order to receive some ETH and SNT so you can buy an ENS username and pay for food and drinks!</p>;
+                } else {
+                    messageTitle = "Transaction is being processed";
+                    messageBody = <Fragment><p>You will shortly receive some ETH and SNT, just for attending #CryptoLife! Use it to register an ENS Name and buy food.</p><p>We hope you have a wonderful time bringing crypto closer to life with us.</p></Fragment>    
+                }
                 break;
             case "red":
                 messageTitle = "Shit, there was an error"; 
@@ -141,7 +149,7 @@ class App extends React.Component {
         }
 
         return <div className={className + " container"}>
-            <div id="image">
+            <div id="image" className={showImage?'':'no-show'}>
             
             </div>
             <div className="message-title" onClick={(e) => this.showErrorMessage()}>

@@ -1,4 +1,4 @@
 export default {
-    'ENSDappURL': 'http://www.status.im/',
+    'ENSDappURL': 'names.statusnet.eth',
     'APIServer': 'http://localhost:3000/api'
 };
