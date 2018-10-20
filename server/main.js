@@ -20,7 +20,7 @@ const events = new EventEmitter();
 
 let contract;
 
-const web3 = new Web3(new Web3.providers.WebsocketProvider(config.connectionURL, {headers: {Origin: "embark"}}));
+const web3 = new Web3(config.connectionURL);
 const account = web3.eth.accounts.privateKeyToAccount(config.controllerPrivK);
 
 
