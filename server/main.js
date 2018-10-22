@@ -124,7 +124,7 @@ const process = async (request) => {
 
         const tx = {
             gasPrice: parseInt(gasPrice),
-            gas: estimatedGas + 1000,
+            gas: estimatedGas + 50000,
             from: account.address,
             to: config.contractAddress,
             value: "0x00",

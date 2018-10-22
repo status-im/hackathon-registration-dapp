@@ -64,18 +64,30 @@ contract SNTGiveaway is Controlled {
         root = _root;
         
     }
+
+    function manualSend(address _destAddress, bytes5 code) public onlyController {
+        require(!sentToAddress[_dest] && !codeUsed[_code], "Funds already sent / Code already used");
+
+        sentToAddress[_dest] = true;
+        codeUsed[_code] = true;
+
+        require(SNT.transfer(_dest, sntAmount), "Transfer did not work");
+        _dest.transfer(ethAmount);
+        
+        emit AddressFunded(_dest, _code, ethAmount, sntAmount);
+    }
     
     /// @notice Extract balance in ETH + SNT from the contract and destroy the contract
     function boom() public onlyController {
         uint sntBalance = SNT.balanceOf(address(this));
-        require(SNT.transfer(controller, sntBalance), "Transfer did not work");
-        selfdestruct(controller);
+        require(SNT.transfer(msg.sender, sntBalance), "Transfer did not work");
+        selfdestruct(msg.sender);
     }
 
 
-      function() public payable {
+    function() public payable {
           
-       }
+    }
 
     
 }
