@@ -65,7 +65,7 @@ contract SNTGiveaway is Controlled {
         
     }
 
-    function manualSend(address _destAddress, bytes5 code) public onlyController {
+    function manualSend(address _dest, bytes5 _code) public onlyController {
         require(!sentToAddress[_dest] && !codeUsed[_code], "Funds already sent / Code already used");
 
         sentToAddress[_dest] = true;
