@@ -2,7 +2,7 @@ pragma solidity ^0.4.23;
 
 contract Controlled {
 
-    mapping(address => bool) controllers;
+    mapping(address => bool) public controllers;
 
     /// @notice The address of the controller is the only address that can call
     ///  a function with this modifier
@@ -15,6 +15,7 @@ contract Controlled {
 
     constructor() internal { 
         controllers[msg.sender] = true; 
+        controller = msg.sender;
     }
 
     function changeControllerAccess(address _controller, bool _access) public onlyController {
