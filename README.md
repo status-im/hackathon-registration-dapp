@@ -1,5 +1,8 @@
 # hackathon-registration-dapp
 
+### Prerequisites:
+- Geth, IPFS and Embark installed
+
 ### Installation:
 
 ```
@@ -17,7 +20,7 @@ A nodejs service was created to receive funding requests. It requires a geth lig
 1. Edit `server/config.js` and set the contract address and the private key of the controller address.
 2. `node server/main.js`
 
-### Running the dapp.
+### Running the dapp in a development environment
 0. `embark run`
 1. Browse  http://localhost:8000/index.htm?CODE_TO_REDEEM
 

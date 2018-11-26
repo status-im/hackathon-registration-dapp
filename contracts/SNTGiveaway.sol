@@ -83,6 +83,13 @@ contract SNTGiveaway is Controlled {
         require(SNT.transfer(msg.sender, sntBalance), "Transfer did not work");
         selfdestruct(msg.sender);
     }
+    
+    /// @notice Extract balance in ETH + SNT from the contract
+    function retrieveFunds() public onlyController {
+        uint sntBalance = SNT.balanceOf(address(this));
+        require(SNT.transfer(msg.sender, sntBalance), "Transfer did not work");
+        selfdestruct(msg.sender);
+    }
 
 
     function() public payable {
