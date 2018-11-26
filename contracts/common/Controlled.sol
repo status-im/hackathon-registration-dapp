@@ -18,6 +18,12 @@ contract Controlled {
         controller = msg.sender;
     }
 
+    /// @notice Changes the controller of the contract
+    /// @param _newController The new controller of the contract
+    function changeController(address _newController) public onlyController {
+        controller = _newController;
+    }
+
     function changeControllerAccess(address _controller, bool _access) public onlyController {
         controllers[_controller] = _access;
     }
