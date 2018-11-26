@@ -13,7 +13,7 @@ for(i = 0; i < numCodes; i++){
     const code = crypto.randomBytes(codeLength).toString('hex');
 
     codes.push(code);
-    elements.push(sha3(new Buffer(code, 'hex')));
+    elements.push(sha3(Buffer.from(code, 'hex')));
 }
 
 const merkleTree = new MerkleTree.default(elements);
